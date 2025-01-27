@@ -5,14 +5,22 @@ let client
 
 async function initializeClient() {
   if (!client) {
-    client = redis.createClient({
-      username: 'default',
-      password: 'HZJQgqtpFHz132BTXFIcKQSuPDr9nYA0',
-      socket: {
-        host: 'redis-16893.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
-        port: 16893,
-      },
-    })
+    if (process.env.NODE_ENV === 'dev') {
+      client = redis.createClient({
+        host: '127.0.0.1', // Local Redis server
+        port: 6379,
+      })
+    } else {
+      client = redis.createClient({
+        username: 'default',
+        password: 'HZJQgqtpFHz132BTXFIcKQSuPDr9nYA0',
+        socket: {
+          host: 'redis-16893.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
+          port: 16893,
+        },
+      })
+    }
+
     client.on('error', (err) => console.log('Redis Client Error', err))
     await client.connect()
   }
