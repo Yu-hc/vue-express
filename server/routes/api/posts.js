@@ -7,7 +7,13 @@ router.get('/', async (req, res) => {
   const client = await connectClient()
   const posts = await client.get('foo')
   res.send(posts)
-  // res.send('hello')
+  res.status(200).send()
+})
+
+router.post('/', async (req, res) => {
+  const client = await connectClient()
+  await client.set('foo', req.body.text)
+  res.status(200).send()
 })
 
 async function connectClient() {
