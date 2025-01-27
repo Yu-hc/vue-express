@@ -6,12 +6,14 @@ let client
 async function initializeClient() {
   if (!client) {
     if (process.env.NODE_ENV === 'dev') {
+      // Local redis server
       client = redis.createClient({
-        host: '127.0.0.1', // Local Redis server
+        host: '127.0.0.1',
         port: 6379,
       })
     } else {
       client = redis.createClient({
+        // Remote redis server
         username: 'default',
         password: 'HZJQgqtpFHz132BTXFIcKQSuPDr9nYA0',
         socket: {
@@ -20,7 +22,6 @@ async function initializeClient() {
         },
       })
     }
-
     client.on('error', (err) => console.log('Redis Client Error', err))
     await client.connect()
   }
@@ -34,15 +35,12 @@ router.get('/', async (req, res) => {
   await initializeClient()
   var posts = {}
   const keys = await client.keys('*')
-  //   console.log('keys',keys)
   for (var i = 0; i < keys.length; i++) {
     const value = await client.get(keys[i])
     posts[keys[i]] = value
   }
-  console.log('posts', posts)
-  res.send(posts)
-
-  res.status(100).send()
+  //   console.log('posts', posts)
+  res.status(200).send(posts)
 })
 
 router.post('/', async (req, res) => {
@@ -51,10 +49,29 @@ router.post('/', async (req, res) => {
   res.status(200).send()
 })
 
-// Gracefully shut down the Redis connection on termination
+router.delete('/', async (req, res) => {
+  await initializeClient()
+
+  const key = req.body.key
+  if (!key) {
+    return res.status(400).send({ error: 'Key is required' }) // 400 Bad Request
+  }
+
+  // Attempt to delete the key
+  const result = await client.del(key)
+
+  if (result === 1) {
+    // Key was successfully deleted
+    res.status(200).send({ message: `Key '${key}' deleted successfully` })
+  } else {
+    // Key does not exist
+    res.status(404).send({ error: `Key '${key}' not found` })
+  }
+})
+
+// Shut down the Redis connection on termination
 process.on('SIGINT', async () => {
   console.log('Shutting down server gracefully...')
-  // Close the Redis client connection
   if (client) {
     await client.quit()
     console.log('Redis client disconnected')
