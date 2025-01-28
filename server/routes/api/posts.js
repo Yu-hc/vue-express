@@ -1,6 +1,5 @@
 const express = require('express')
 const redis = require('redis')
-
 let client
 
 async function initializeClient() {
@@ -45,6 +44,8 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   await initializeClient()
+  // const data = { author: 'qwer', date: '2024/01/22', text: 'some comments', rate: 5 }
+  // const jsonData = JSON.stringify(data)
   await client.set(req.body.key, req.body.value)
   res.status(200).send()
 })
@@ -57,9 +58,7 @@ router.delete('/', async (req, res) => {
     return res.status(400).send({ error: 'Key is required' }) // 400 Bad Request
   }
 
-  // Attempt to delete the key
   const result = await client.del(key)
-
   if (result === 1) {
     // Key was successfully deleted
     res.status(200).send({ message: `Key '${key}' deleted successfully` })
