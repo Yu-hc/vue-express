@@ -38,14 +38,11 @@ router.get('/', async (req, res) => {
     const value = await client.get(keys[i])
     posts[keys[i]] = value
   }
-  //   console.log('posts', posts)
   res.status(200).send(posts)
 })
 
 router.post('/', async (req, res) => {
   await initializeClient()
-  // const data = { author: 'qwer', date: '2024/01/22', text: 'some comments', rate: 5 }
-  // const jsonData = JSON.stringify(data)
   await client.set(req.body.key, req.body.value)
   res.status(200).send()
 })

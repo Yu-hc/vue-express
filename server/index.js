@@ -10,8 +10,10 @@ app.use(cors())
 app.use(bodyParser.json())
 
 const posts = require('./routes/api/posts')
+const books = require('./routes/api/books')
 
 app.use('/api/posts', posts)
+app.use('/api/books', books)
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(__dirname + '/public/'))
