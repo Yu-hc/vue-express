@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
     const value = await client.get(keys[i])
     posts[keys[i]] = value
   }
-  //   console.log('posts', posts)
+  // console.log('posts', posts)
   res.status(200).send(posts)
 })
 

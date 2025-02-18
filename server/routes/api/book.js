@@ -33,11 +33,12 @@ const router = express.Router()
 router.get('/', async (req, res) => {
   await initializeClient()
   var posts = {}
-  const keys = await client.keys(`${req.query.type}*`)
+  const keys = await client.keys(`*BOOK:*`)
   for (var i = 0; i < keys.length; i++) {
     const value = await client.get(keys[i])
     posts[keys[i]] = value
   }
+  console.log('received')
   res.status(200).send(posts)
 })
 
