@@ -9,10 +9,10 @@ lerna-debug.log*
 
 node_modules
 client
+python_backend
 package-lock.json
 .DS_Store
 .env
-dist
 dist-ssr
 coverage
 *.local

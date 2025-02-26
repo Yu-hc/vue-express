@@ -16,14 +16,14 @@ app.use('/api/review', review)
 app.use('/api/book', book)
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(__dirname + '/public/'))
-  app.get('/.*/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html')
-  })
+    app.use(express.static(__dirname + '/dist/'))
+    app.get('/.*/', (req, res) => {
+        res.sendFile(__dirname + '/dist/index.html')
+    })
 }
 
 const port = process.env.PORT || 3000
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`)
+    console.log(`Server running on port ${port}`)
 })
