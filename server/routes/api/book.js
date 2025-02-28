@@ -2,6 +2,7 @@ const express = require('express')
 const redis = require('redis')
 
 let client
+let booksCache
 
 async function initializeClient() {
     if (client) return
@@ -28,9 +29,8 @@ async function initializeClient() {
 
 initializeClient()
 
-const router = express.Router()
-
-router.get('/', async (req, res) => {
+// store the book data in cache so that the IO will be faster
+async function updateCache(){
     await initializeClient()
     var books = {}
     var keys_ = await client.keys(`*BOOK:*`)
@@ -40,13 +40,24 @@ router.get('/', async (req, res) => {
         const value = await client.get(keys[i])
         books[keys[i]] = value
     }
-    res.status(200).send(books)
+    booksCache = books
+}
+
+updateCache()
+
+const router = express.Router()
+
+router.get('/', async (req, res) => {
+    if(!booksCache)
+        updateCache()
+    res.status(200).send(booksCache)
 })
 
 router.post('/', async (req, res) => {
     await initializeClient()
     await client.set(req.body.key, req.body.value)
     res.status(200).send()
+    await updateCache()
 })
 
 router.delete('/', async (req, res) => {
