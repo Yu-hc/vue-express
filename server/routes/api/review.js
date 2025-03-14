@@ -21,11 +21,8 @@ async function initializeClient() {
 
 initializeClient()
 
-let isUpdatingCache = false
 // store the book data in cache so that the IO will be faster
 async function updateCache() {
-    if (isUpdatingCache) return // Skip if already updating
-    isUpdatingCache = true
     await initializeClient()
     var reviews = {}
     var keys_ = await client.keys(`*REVIEW:*`)
@@ -36,7 +33,6 @@ async function updateCache() {
         reviews[keys[i]] = value
     }
     reviewsCache = reviews
-    isUpdatingCache = false
 }
 
 updateCache()
