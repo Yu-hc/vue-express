@@ -7,26 +7,30 @@ let booksCache
 async function initializeClient() {
     if (client) return
 
-    client = redis.createClient({
-        username: 'default',
-        password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
-        socket: {
-            host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
-            port: 18745,
-        },
-    })
-
+    if (process.env.NODE_ENV === 'dev') {
+        // Local redis server
+        client = redis.createClient({
+            host: '127.0.0.1',
+            port: 6379,
+        })
+    } else {
+        client = redis.createClient({
+            username: 'default',
+            password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
+            socket: {
+                host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
+                port: 18745,
+            },
+        })
+    }
     client.on('error', (err) => console.log('Redis Client Error', err))
     await client.connect()
 }
 
 initializeClient()
 
-let isUpdatingCache = false
 // store the book data in cache so that the IO will be faster
 async function updateCache() {
-    if (isUpdatingCache) return // Skip if already updating
-    isUpdatingCache = true
     await initializeClient()
     var books = {}
     var keys_ = await client.keys(`*BOOK:*`)
@@ -37,27 +41,19 @@ async function updateCache() {
         books[keys[i]] = value
     }
     booksCache = books
-    isUpdatingCache = false
 }
 
 updateCache()
 
 const router = express.Router()
-
 router.get('/', async (req, res) => {
-    if (!booksCache) {
-        updateCache()
-    }
+    if (!booksCache) updateCache()
     res.status(200).send(booksCache)
-    updateCache()
 })
-
 router.post('/', async (req, res) => {
-    await initializeClient()
-    if (!booksCache) await updateCache()
+    if (!booksCache) updateCache()
     booksCache[req.body.key] = req.body.value
     res.status(200).send()
-    console.log(req.body.key, req.body.value)
     client.set(req.body.key, req.body.value)
 })
 
