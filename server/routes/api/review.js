@@ -1,25 +1,19 @@
 const express = require('express')
 const redis = require('redis')
 let client
+let reviewsCache
 
 async function initializeClient() {
     if (!client) {
-        if (process.env.NODE_ENV === 'dev') {
-            // Local redis server
-            client = redis.createClient({
-                host: '127.0.0.1',
-                port: 6379,
-            })
-        } else {
-            client = redis.createClient({
-                username: 'default',
-                password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
-                socket: {
-                    host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
-                    port: 18745,
-                },
-            })
-        }
+        client = redis.createClient({
+            username: 'default',
+            password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
+            socket: {
+                host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
+                port: 18745,
+            },
+        })
+
         client.on('error', (err) => console.log('Redis Client Error', err))
         await client.connect()
     }
@@ -27,26 +21,41 @@ async function initializeClient() {
 
 initializeClient()
 
+let isUpdatingCache = false
+// store the book data in cache so that the IO will be faster
+async function updateCache() {
+    if (isUpdatingCache) return // Skip if already updating
+    isUpdatingCache = true
+    await initializeClient()
+    var reviews = {}
+    var keys_ = await client.keys(`*REVIEW:*`)
+    var keys = Array.from(keys_)
+    keys.sort()
+    for (var i = 0; i < keys.length; i++) {
+        const value = await client.get(keys[i])
+        reviews[keys[i]] = value
+    }
+    reviewsCache = reviews
+    isUpdatingCache = false
+}
+
+updateCache()
+
 const router = express.Router()
 
 router.get('/', async (req, res) => {
     await initializeClient()
-    var posts = {}
-    const keys = await client.keys(`${req.query.type}*`)
-    for (var i = 0; i < keys.length; i++) {
-        const value = await client.get(keys[i])
-        posts[keys[i]] = value
-    }
-    // console.log('posts', posts)
-    res.status(200).send(posts)
+    if (!reviewsCache) await updateCache()
+    res.status(200).send(reviewsCache)
+    updateCache()
 })
 
 router.post('/', async (req, res) => {
     await initializeClient()
-    // const data = { author: 'qwer', date: '2024/01/22', text: 'some comments', rate: 5 }
-    // const jsonData = JSON.stringify(data)
-    await client.set(req.body.key, req.body.value)
+    if (!reviewsCache) await updateCache()
+    reviewsCache[req.body.key] = req.body.value
     res.status(200).send()
+    client.set(req.body.key, req.body.value)
 })
 
 router.delete('/', async (req, res) => {
