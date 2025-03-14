@@ -4,19 +4,19 @@ let client
 let reviewsCache
 
 async function initializeClient() {
-    if (!client) {
-        client = redis.createClient({
-            username: 'default',
-            password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
-            socket: {
-                host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
-                port: 18745,
-            },
-        })
+    if (client) return
 
-        client.on('error', (err) => console.log('Redis Client Error', err))
-        await client.connect()
-    }
+    client = redis.createClient({
+        username: 'default',
+        password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
+        socket: {
+            host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
+            port: 18745,
+        },
+    })
+
+    client.on('error', (err) => console.log('Redis Client Error', err))
+    await client.connect()
 }
 
 initializeClient()
@@ -45,7 +45,9 @@ const router = express.Router()
 
 router.get('/', async (req, res) => {
     await initializeClient()
-    if (!reviewsCache) await updateCache()
+    if (!reviewsCache) {
+        updateCache()
+    }
     res.status(200).send(reviewsCache)
     updateCache()
 })

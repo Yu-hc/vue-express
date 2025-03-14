@@ -45,7 +45,9 @@ updateCache()
 const router = express.Router()
 
 router.get('/', async (req, res) => {
-    if (!booksCache) await updateCache()
+    if (!booksCache) {
+        updateCache()
+    }
     res.status(200).send(booksCache)
     updateCache()
 })
@@ -55,7 +57,7 @@ router.post('/', async (req, res) => {
     if (!booksCache) await updateCache()
     booksCache[req.body.key] = req.body.value
     res.status(200).send()
-    console.log(req.body.key,req.body.value)
+    console.log(req.body.key, req.body.value)
     client.set(req.body.key, req.body.value)
 })
 
