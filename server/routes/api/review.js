@@ -20,9 +20,11 @@ async function initializeClient() {
 }
 
 initializeClient()
-
+let isUpdatingCache = false
 // store the book data in cache so that the IO will be faster
 async function updateCache() {
+    if (isUpdatingCache) return // Skip if already updating
+    isUpdatingCache = true
     await initializeClient()
     var reviews = {}
     var keys_ = await client.keys(`*REVIEW:*`)
@@ -33,6 +35,7 @@ async function updateCache() {
         reviews[keys[i]] = value
     }
     reviewsCache = reviews
+    isUpdatingCache = false
 }
 
 updateCache()
@@ -40,16 +43,14 @@ updateCache()
 const router = express.Router()
 
 router.get('/', async (req, res) => {
-    await initializeClient()
     if (!reviewsCache) {
-        updateCache()
+        await updateCache()
     }
     res.status(200).send(reviewsCache)
     updateCache()
 })
 
 router.post('/', async (req, res) => {
-    await initializeClient()
     if (!reviewsCache) await updateCache()
     reviewsCache[req.body.key] = req.body.value
     res.status(200).send()
