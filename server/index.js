@@ -11,9 +11,12 @@ app.use(bodyParser.json())
 
 const review = require('./routes/api/review')
 const book = require('./routes/api/book')
+const user = require('./routes/api/user')
 
 app.use('/api/review', review)
 app.use('/api/book', book)
+app.use('/api/user', user)
+
 
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(__dirname + '/dist/'))
