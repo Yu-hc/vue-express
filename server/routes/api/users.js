@@ -9,10 +9,10 @@ async function initializeClient() {
 
     client = redis.createClient({
         username: 'default',
-        password: 'AX9zAAIjcDEyMWM3ZDUyMWY4NzY0Y2EzYTk4NDM0ZjNlMzljMDMyOHAxMA',
+        password: 'khAeLNdfuu0Tw9DStuak0NvksyzG9xc9',
         socket: {
-            host: 'unique-terrier-32627.upstash.io',
-            port: 6379,
+            host: 'redis-18745.crce178.ap-east-1-1.ec2.redns.redis-cloud.com',
+            port: 18745,
         },
     })
 
