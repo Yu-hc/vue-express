@@ -32,4 +32,7 @@ coverage
 
 *.tsbuildinfo
 
+# Google API credentials and tokens
+server/credentials.json
+server/token.json
 
