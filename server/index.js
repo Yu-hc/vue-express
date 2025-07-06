@@ -10,11 +10,13 @@ app.use(cors())
 app.use(bodyParser.json())
 
 const review = require('./routes/api/review')
+const reviews = require('./routes/api/reviews')
 const book = require('./routes/api/book')
 const user = require('./routes/api/users')
 const board = require('./routes/api/board');
 
 app.use('/api/review', review)
+app.use('/api/reviews', reviews)
 app.use('/api/book', book)
 app.use('/api/users', user)
 app.use('/api/board', board);
