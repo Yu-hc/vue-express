@@ -121,16 +121,19 @@ router.get('/', async (req, res) => {
             rating: review.rate,
             author: review.user.nickname,
             date: review.createdAt.toISOString().split('T')[0],
-            nested: review.comments.length > 0 ? {
-                author: review.comments[0].commentUser.nickname,
-                date: review.comments[0].createdAt.toISOString().split('T')[0],
-                content: review.comments[0].content,
-                replies: review.comments[0].replies.map(reply => ({
+            // 完整的評論結構，包含所有相關的回覆
+            comments: review.comments.map(comment => ({
+                id: comment._id,
+                author: comment.commentUser.nickname,
+                date: comment.createdAt.toISOString().split('T')[0],
+                content: comment.content,
+                replies: comment.replies.map(reply => ({
+                    id: reply._id,
                     author: reply.replyUser.nickname,
                     date: reply.createdAt.toISOString().split('T')[0],
                     content: reply.content
                 }))
-            } : null
+            }))
         }));
 
         res.json({
@@ -233,6 +236,112 @@ router.post('/:reviewId/comments', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Failed to create comment'
+        });
+    }
+});
+
+// 用戶登入
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email and password are required'
+            });
+        }
+        
+        // 確保資料庫連接
+        if (!db) {
+            return res.status(500).json({
+                success: false,
+                error: 'Database not connected'
+            });
+        }
+        
+        // 查找用戶
+        const user = await db.collection('users').findOne({ email });
+        
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                error: 'User not found'
+            });
+        }
+        
+        // 比對密碼 - 接受資料庫中儲存的原始密碼
+        // 如果是加密密碼，直接比對；如果是明文密碼，也直接比對
+        if (user.password !== password) {
+            return res.status(401).json({
+                success: false,
+                error: 'Invalid password'
+            });
+        }
+        
+        // 登入成功，回傳用戶資訊 (不包含密碼)
+        const { password: _, ...userWithoutPassword } = user;
+        
+        res.json({
+            success: true,
+            data: {
+                user: userWithoutPassword,
+                message: 'Login successful'
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error during login:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Login failed'
+        });
+    }
+});
+
+// 創建測試用戶 (僅供開發使用)
+router.post('/create-test-user', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(500).json({
+                success: false,
+                error: 'Database not connected'
+            });
+        }
+        
+        const testUser = {
+            name: "張小明",
+            email: "ming.zhang@email.com",
+            password: "password123", // 簡單密碼，實際應用請使用加密
+            nickname: "小明",
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+        
+        // 檢查用戶是否已存在
+        const existingUser = await db.collection('users').findOne({ email: testUser.email });
+        if (existingUser) {
+            return res.json({
+                success: true,
+                message: 'Test user already exists',
+                data: testUser
+            });
+        }
+        
+        // 創建新用戶
+        await db.collection('users').insertOne(testUser);
+        
+        res.json({
+            success: true,
+            message: 'Test user created successfully',
+            data: testUser
+        });
+        
+    } catch (error) {
+        console.error('Error creating test user:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to create test user'
         });
     }
 });
