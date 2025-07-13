@@ -14,11 +14,13 @@ const reviews = require('./routes/api/reviews')
 const book = require('./routes/api/book')
 const user = require('./routes/api/users')
 const board = require('./routes/api/board');
+const events = require('./routes/api/events');
 
 app.use('/api/review', review)
 app.use('/api/reviews', reviews)
 app.use('/api/book', book)
 app.use('/api/users', user)
+app.use('/api/events', events);
 app.use('/api/board', board);
 
 
