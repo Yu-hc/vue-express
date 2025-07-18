@@ -71,6 +71,7 @@ router.post('/', async (req, res) => {
 	const database = client.db('ntusfa-web')
 	const booksCollection = database.collection('books')
 	console.log('Updating book with _id:', _id)
+	console.log('Update data:', updateData)
 	const result = await booksCollection.updateOne(
 		{ _id: new ObjectId(_id) }, // Convert _id to ObjectId
 		{ $set: updateData }, // Update specified fields
