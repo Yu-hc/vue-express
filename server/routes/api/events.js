@@ -29,6 +29,7 @@ router.get('/', async (req, res) => {
         
         console.log('成功獲取 events 資料，條數:', cache ? cache.length : 0)
         res.json(cache)
+        await updateCache() // 更新 cache 以便下次請求能夠快速響應
     } catch (err) {
         console.error('獲取 events 資料時發生錯誤:', err)
         res.status(500).json({ error: err.message })
