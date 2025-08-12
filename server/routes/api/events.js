@@ -4,7 +4,7 @@ const { readSheet } = require('../../googleSheet') // 確保這個路徑正確�
 
 // 替換為你的試算表ID與範圍
 const SPREADSHEET_ID = '1SrPn-ypwQjyDvto3t6Jn540a-SwqJ4YroyV7JSgM3cM'
-const RANGE = 'events!A1:C'  // 使用 events 工作表（小寫），只讀取 A、B、C 三欄
+const RANGE = 'events!A1:D'  // 使用 events 工作表（小寫），只讀取 A-D 肆欄
 
 // cache 用來存儲 Google Sheets 資料
 let cache = null
