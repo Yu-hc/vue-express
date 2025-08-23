@@ -26,12 +26,12 @@ app.use('/api/board', board);
 app.use('/api/records', records);
 
 
-// if (process.env.NODE_ENV === 'production') {
-//     app.use(express.static(__dirname + '/dist/'))
-//     app.get('/.*/', (req, res) => {
-//         res.sendFile(__dirname + '/dist/index.html')
-//     })
-// }
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(__dirname + '/dist/'))
+    app.get('/.*/', (req, res) => {
+        res.sendFile(__dirname + '/dist/index.html')
+    })
+}
 
 const port = process.env.PORT || 3000
 
