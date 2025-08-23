@@ -25,7 +25,7 @@ app.use('/api/events', events);
 app.use('/api/board', board);
 app.use('/api/records', records);
 
-
+// Please comment the following lines if you have not built the frontend
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(__dirname + '/dist/'))
     app.get('/.*/', (req, res) => {
